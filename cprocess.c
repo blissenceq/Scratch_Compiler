@@ -30,9 +30,9 @@ char compile_process_next_char(struct lex_process* lex_process)
     compiler->pos.column += 1;
     char c = getc(compiler->cfile.fp);
 
-    if(c == "\n") {
+    if(c == '\n') {
         compiler->pos.line += 1;
-        compiler->pos.column = 0;
+        compiler->pos.column = 1;
     }
 
     return c;
