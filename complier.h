@@ -44,7 +44,7 @@ struct token
     
 };
 
-struct pos
+struct position
 {
     int line;
     int column;
