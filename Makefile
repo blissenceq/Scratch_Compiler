@@ -13,11 +13,11 @@ all: ${OBJECTS}
 ./build/lex_process.o: ./lex_process.c
 	gcc ./lex_process.c ${INCLUDES} -o ./build/lex_process.o -g -c
 
-./helpers/buffer.o: ./buffer.c
-	gcc ./buffer.c ${INCLUDES} -o ./helpers/buffer.o -g -c
+./helpers/buffer.o: ./helpers/buffer.c
+	gcc ./helpers/buffer.c ${INCLUDES} -o ./helpers/buffer.o -g -c
 
-./helpers/vector.o: ./vector.c
-	gcc ./vector.c ${INCLUDES} -o ./helpers/vector.o -g -c
+./helpers/vector.o: ./helpers/vector.c
+	gcc ./helpers/vector.c ${INCLUDES} -o ./helpers/vector.o -g -c
 
 clean:
 	rm ./main
