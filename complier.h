@@ -39,6 +39,7 @@ struct token
         void* any;
     };
 
+    //True if there is awhite space between the current token and next token
     bool whitespace;
     const char* between_brackets;
     
