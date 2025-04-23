@@ -20,6 +20,8 @@ void lex_process_free(struct lex_process* process);
 void* lex_process_private(struct lex_process* process);
 struct vector* lex_process_tokens(struct lex_process* process);
 int lex(struct lex_process* process);
+void compiler_error(struct compile_process* compiler, const char* message, ...);
+void compiler_warning(struct compile_process* compiler, const char* message, ...);
 
 enum {
     COMPILER_FILE_COMPILED_OK,

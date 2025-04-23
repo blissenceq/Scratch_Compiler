@@ -1,3 +1,5 @@
+#include <stdarg.h>
+#include <stdlib.h>
 #include "complier.h"
 
 struct lex_process_functions compiler_lex_functions = {
@@ -26,4 +28,23 @@ int compile_file(const char* filename, const char* out_filename, int flags) {
     // perform code generation
 
     return COMPILER_FILE_COMPILED_OK;
+}
+
+void compiler_error(struct compile_process* compiler, const char* message, ...)
+{
+    va_list args;
+    va_start(args, message);
+    vfprintf(stderr, message, args);
+    va_end(args);
+    fprintf(stderr, " on line %i, col %i in file %s\n", compiler->pos.line, compiler->pos.column, compiler->pos.filename);
+    exit(-1);
+}
+
+void compiler_warning(struct compile_process* compiler, const char* message, ...)
+{
+    va_list args;
+    va_start(args, message);
+    vfprintf(stderr, message, args);
+    va_end(args);
+    fprintf(stderr, " on line %i, col %i in file %s\n", compiler->pos.line, compiler->pos.column, compiler->pos.filename);
 }
