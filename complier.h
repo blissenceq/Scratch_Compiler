@@ -44,6 +44,18 @@ enum {
     TOKEN_TYPE_NEWLINE
 };
 
+#define NUMERIC_CASE \
+    case '0':       \
+    case '1':       \
+    case '2':       \
+    case '3':       \
+    case '4':       \
+    case '5':       \
+    case '6':       \
+    case '7':       \
+    case '8':       \
+    case '9'
+
 typedef char (*LEX_PROCESS_NEXT_CHAR)(struct lex_process* process);
 typedef char (*LEX_PROCESS_PEEK_CHAR)(struct lex_process* process);
 typedef void (*LEX_PROCESS_PUSH_CHAR)(struct lex_process* process, char c);
@@ -52,7 +64,8 @@ struct token
 {
     int type;
     int flags;
-
+    struct position pos;
+    
     union
     {
         char cval;
