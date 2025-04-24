@@ -44,14 +44,34 @@ enum {
     TOKEN_TYPE_NEWLINE
 };
 
+#define NUMERIC_CASE \
+    case '0':       \
+    case '1':       \
+    case '2':       \
+    case '3':       \
+    case '4':       \
+    case '5':       \
+    case '6':       \
+    case '7':       \
+    case '8':       \
+    case '9'
+
 typedef char (*LEX_PROCESS_NEXT_CHAR)(struct lex_process* process);
 typedef char (*LEX_PROCESS_PEEK_CHAR)(struct lex_process* process);
 typedef void (*LEX_PROCESS_PUSH_CHAR)(struct lex_process* process, char c);
+
+struct position
+{
+    int line;
+    int column;
+    const char* filename;
+};
 
 struct token
 {
     int type;
     int flags;
+    struct position pos;
 
     union
     {
@@ -63,17 +83,10 @@ struct token
         void* any;
     };
 
-    //True if there is awhite space between the current token and next token
+    //True if there is a white space between the current token and next token
     bool whitespace;
     const char* between_brackets;
     
-};
-
-struct position
-{
-    int line;
-    int column;
-    const char* filename;
 };
 
 struct compile_process
