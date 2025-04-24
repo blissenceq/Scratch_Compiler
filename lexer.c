@@ -5,7 +5,7 @@
 
 
 #define LEX_GETC_IF(buffer, c, expression)      \
-    for (c = peekc(); expression; c = peakc())  \
+    for (c = peekc(); expression; c = peekc())  \
     {                                           \
         buffer_write(buffer, c);                \
         nextc();                                \
