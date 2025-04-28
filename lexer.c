@@ -2,6 +2,7 @@
 #include "string.h"
 #include "helpers/vector.h"
 #include "helpers/buffer.h"
+#include <assert.h>
 
 
 #define LEX_GETC_IF(buffer, c, expression)      \
@@ -93,6 +94,24 @@ struct token* token_make_number()
     return token_make_number_for_value(read_number());
 }
 
+struct token* token_make_string(char start_delimiter, char end_delimiter)
+{
+    struct buffer* buffer = buffer_create();
+    assert(nextc() == start_delimiter);
+    char c = nextc();
+    for (; c != end_delimiter && c != EOF; c = nextc()) {
+        if (c == '\\') {
+            // Implement code for line break
+            continue;
+        }
+
+        buffer_write(buffer, c);
+    }
+
+    buffer_write(buffer, 0x00);
+    return token_create(&(struct token){.type=TOKEN_TYPE_STRING,.sval=buffer_ptr(buffer)});
+}
+
 struct token* read_next_token()
 {
     struct token* token = NULL;
@@ -101,6 +120,10 @@ struct token* read_next_token()
     {
         NUMERIC_CASE:
             token = token_make_number();
+            break;
+
+        case '"':
+            token = token_make_string('"', '"');
             break;
 
         case ' ':
