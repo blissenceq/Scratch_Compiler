@@ -56,6 +56,16 @@ enum {
     case '8':       \
     case '9'
 
+#define SYMBOL_CASE \
+    case '{':       \
+    case '}':       \
+    case '#':       \
+    case ':':       \
+    case ';':       \
+    case ']':       \
+    case ')':       \
+    case '\\'
+
 typedef char (*LEX_PROCESS_NEXT_CHAR)(struct lex_process* process);
 typedef char (*LEX_PROCESS_PEEK_CHAR)(struct lex_process* process);
 typedef void (*LEX_PROCESS_PUSH_CHAR)(struct lex_process* process, char c);
