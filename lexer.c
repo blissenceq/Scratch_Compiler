@@ -56,6 +56,14 @@ static struct token* lexer_last_token()
     return vector_back_or_null(lex_process->token_vec);
 }
 
+static void lex_finish_expression()
+{
+    lex_process->current_expression_count--;
+    if (lex_process->current_expression_count < 0) {
+        compiler_error(lex_process->compiler, "Closed an expression that was never opened");
+    }
+}
+
 struct token* handle_whitespace()
 {
     struct token* last_token = lexer_last_token();
@@ -118,6 +126,15 @@ struct token* token_make_newline()
     return token_create(&(struct token){.type=TOKEN_TYPE_NEWLINE});
 }
 
+struct token* token_make_symbol()
+{
+    char c = nextc();
+    if (c == ')') {
+        lex_finish_expression();
+    }
+    return token_create(&(struct token){.type=TOKEN_TYPE_SYMBOL,.cval=c});
+}
+
 struct token* read_next_token()
 {
     struct token* token = NULL;
@@ -126,6 +143,10 @@ struct token* read_next_token()
     {
         NUMERIC_CASE:
             token = token_make_number();
+            break;
+
+        SYMBOL_CASE:
+            token = token_make_symbol();
             break;
 
         case '"':
