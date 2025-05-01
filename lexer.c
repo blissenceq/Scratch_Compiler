@@ -194,10 +194,66 @@ struct token* read_default_token()
     } else return NULL;
 }
 
+struct token* token_make_single_line_comment()
+{
+    struct buffer* buffer = buffer_create();
+    char c = 0;
+    LEX_GETC_IF(buffer, c, c != EOF && c != '\n');
+    buffer_write(buffer, 0x00);
+    return token_create(&(struct token){.type=TOKEN_TYPE_COMMENT,.sval=buffer_ptr(buffer)});
+}
+
+struct token* token_make_multi_line_comment()
+{
+    struct buffer* buffer = buffer_create();
+    char c = 0;
+
+    while(true) {
+        LEX_GETC_IF(buffer, c, c != EOF && c != '*');
+        if (c == EOF) {
+            compiler_error(lex_process->compiler, "Multiline comment not closed");
+        } else if (c == '*') {
+            nextc();
+            if (peekc() == '/') {
+                nextc();
+                break;
+            }
+        }
+    }
+
+    return token_create(&(struct token){.type=TOKEN_TYPE_COMMENT,.sval=buffer_ptr(buffer)});
+}
+
+struct token* token_make_comment()
+{
+    char c = peekc();
+    if (c == '/') {
+        nextc();
+        if (peekc() == '/') {
+            nextc();
+            return token_make_single_line_comment();
+        } else if (peekc == '*') {
+            nextc();
+            return token_make_multi_line_comment();
+        } 
+
+        // Case: Division operator; TODO: Handle division operator
+        pushc('/');
+        return NULL;
+    }
+
+    return NULL;
+}
+
 struct token* read_next_token()
 {
     struct token* token = NULL;
     char c = peekc();
+    token = token_make_comment();
+    if (token) {
+        return token;
+    }
+    
     switch (c)
     {
         NUMERIC_CASE:
