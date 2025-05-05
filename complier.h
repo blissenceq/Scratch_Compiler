@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 struct token;
 struct position;
@@ -43,6 +44,9 @@ enum {
     TOKEN_TYPE_COMMENT,
     TOKEN_TYPE_NEWLINE
 };
+
+#define S_EQ(string1, string2)  \
+    string1 && string2 && (strcmp(string1, string2) == 0)
 
 #define NUMERIC_CASE \
     case '0':       \
