@@ -232,7 +232,7 @@ struct token* token_make_comment()
         if (peekc() == '/') {
             nextc();
             return token_make_single_line_comment();
-        } else if (peekc == '*') {
+        } else if (peekc() == '*') {
             nextc();
             return token_make_multi_line_comment();
         } 
