@@ -41,6 +41,13 @@ static char nextc()
     return c;
 }
 
+static char assert_next_character(char c)
+{
+    char next_c = nextc();
+    assert(next_c == c);
+    return nextc();
+}
+
 static struct position lex_file_position()
 {
     return lex_process->pos;
@@ -245,9 +252,41 @@ struct token* token_make_comment()
     return NULL;
 }
 
-struct token* token_create_quote()
+char lex_get_escaped_char(char c)
 {
-    return NULL;
+    char output = 0;
+    switch(c)
+    {
+        case 'n':
+            output = '\n';
+            break;
+        case '\\':
+            output = '\\';
+            break;
+        case 't':
+            output = '\t';
+            break;
+        case '\'':
+            output = '\'';
+            break;
+    }
+
+    return output;
+}
+
+struct token* token_make_quote()
+{
+    assert_next_character('\'');
+    char c = nextc();
+    if (c == '\\') {
+        c = nextc();
+        c = lex_get_escaped_char(c);
+    }
+    if (peekc() != '\'') {
+        compiler_error(lex_process->compiler, "Opened quote not closed");
+    }
+    nextc();
+    return token_create(&(struct token){.type=TOKEN_TYPE_NUMBER,.cval=c});
 }
 
 struct token* read_next_token()
@@ -283,6 +322,10 @@ struct token* read_next_token()
             break;
 
         case EOF:
+            break;
+
+        case '\'':
+            token = token_make_quote();
             break;
         
         default:
