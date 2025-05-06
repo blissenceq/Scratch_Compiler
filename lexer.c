@@ -284,6 +284,7 @@ struct token* token_make_quote()
     }
     if (peekc() != '\'') {
         compiler_error(lex_process->compiler, "Opened quote not closed");
+        //TODO: check why this block gets executed for 'a' and '\\' 
     }
     nextc();
     return token_create(&(struct token){.type=TOKEN_TYPE_NUMBER,.cval=c});
