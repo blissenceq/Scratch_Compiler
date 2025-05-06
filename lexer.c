@@ -245,6 +245,11 @@ struct token* token_make_comment()
     return NULL;
 }
 
+struct token* token_create_quote()
+{
+    return NULL;
+}
+
 struct token* read_next_token()
 {
     struct token* token = NULL;
