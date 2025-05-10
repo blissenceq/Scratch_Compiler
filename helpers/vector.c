@@ -119,7 +119,7 @@ void *vector_peek_at(struct vector *vector, int index)
         return NULL;
     }
 
-    void* ptr = vector_at(vector, index);
+    void *ptr = vector_at(vector, index);
     return ptr;
 }
 
@@ -134,7 +134,7 @@ void *vector_peek_no_increment(struct vector *vector)
     return ptr;
 }
 
-void vector_peek_back(struct vector* vector)
+void vector_peek_back(struct vector *vector)
 {
     vector->pindex--;
 }
@@ -226,10 +226,10 @@ void vector_save_purge(struct vector *vector)
     vector_pop(vector->saves);
 }
 
-void vector_pop_last_peek(struct vector* vector)
+void vector_pop_last_peek(struct vector *vector)
 {
     assert(vector->pindex >= 1);
-    vector_pop_at(vector, vector->pindex-1);
+    vector_pop_at(vector, vector->pindex - 1);
 }
 
 void vector_push(struct vector *vector, void *elem)
@@ -304,13 +304,13 @@ void vector_stretch(struct vector *vector, int index)
     vector->rindex = index;
 }
 
-int vector_pop_value(struct vector* vector, void* val)
+int vector_pop_value(struct vector *vector, void *val)
 {
     int old_pp = vector->pindex;
     vector_set_peek_pointer(vector, 0);
-    void* ptr = vector_peek_ptr(vector);
+    void *ptr = vector_peek_ptr(vector);
     int index = 0;
-    while(ptr)
+    while (ptr)
     {
         if (ptr == val)
         {
