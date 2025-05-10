@@ -11,30 +11,34 @@ struct compile_process;
 struct lex_process;
 struct lex_process_functions;
 
-int compile_file(const char* filename, const char* out_filename, int file);
-struct compile_process* compile_process_create(const char* filename, const char* filename_out, int flags);
-char compile_process_next_char(struct lex_process* lex_process);
-char compile_process_peek_char(struct lex_process* lex_process);
-void compile_process_push_char(struct lex_process* lex_process, char c);
-struct lex_process* lex_process_create(struct compile_process* compiler, struct lex_process_functions* functions, void* private);
-void lex_process_free(struct lex_process* process);
-void* lex_process_private(struct lex_process* process);
-struct vector* lex_process_tokens(struct lex_process* process);
-int lex(struct lex_process* process);
-void compiler_error(struct compile_process* compiler, const char* message, ...);
-void compiler_warning(struct compile_process* compiler, const char* message, ...);
+int compile_file(const char *filename, const char *out_filename, int file);
+struct compile_process *compile_process_create(const char *filename, const char *filename_out, int flags);
+char compile_process_next_char(struct lex_process *lex_process);
+char compile_process_peek_char(struct lex_process *lex_process);
+void compile_process_push_char(struct lex_process *lex_process, char c);
+struct lex_process *lex_process_create(struct compile_process *compiler, struct lex_process_functions *functions, void *private);
+void lex_process_free(struct lex_process *process);
+void *lex_process_private(struct lex_process *process);
+struct vector *lex_process_tokens(struct lex_process *process);
+int lex(struct lex_process *process);
+void compiler_error(struct compile_process *compiler, const char *message, ...);
+void compiler_warning(struct compile_process *compiler, const char *message, ...);
+bool is_token_keyword(struct token *token, const char *value);
 
-enum {
+enum
+{
     COMPILER_FILE_COMPILED_OK,
     COMPILER_FAILED_WITH_ERRORS
 };
 
-enum {
+enum
+{
     LEXICAL_ANALYSIS_ALL_OK,
     LEXICAL_ANALYSIS_INPUT_ERROR
 };
 
-enum {
+enum
+{
     TOKEN_TYPE_IDENTIFIER,
     TOKEN_TYPE_KEYWORD,
     TOKEN_TYPE_OPERATOR,
@@ -45,20 +49,39 @@ enum {
     TOKEN_TYPE_NEWLINE
 };
 
-#define S_EQ(string1, string2)  \
-    string1 && string2 && (strcmp(string1, string2) == 0)
+#define S_EQ(string1, string2) \
+    string1 &&string2 && (strcmp(string1, string2) == 0)
 
 #define NUMERIC_CASE \
-    case '0':       \
-    case '1':       \
-    case '2':       \
-    case '3':       \
-    case '4':       \
-    case '5':       \
-    case '6':       \
-    case '7':       \
-    case '8':       \
+    case '0':        \
+    case '1':        \
+    case '2':        \
+    case '3':        \
+    case '4':        \
+    case '5':        \
+    case '6':        \
+    case '7':        \
+    case '8':        \
     case '9'
+
+#define OPERATOR_CASE_EXCLUDING_DIVISION \
+    case '+':                            \
+    case '-':                            \
+    case '*':                            \
+    case '>':                            \
+    case '<':                            \
+    case '^':                            \
+    case '%':                            \
+    case '!':                            \
+    case '=':                            \
+    case '~':                            \
+    case '|':                            \
+    case '&':                            \
+    case '(':                            \
+    case '[':                            \
+    case ',':                            \
+    case '.':                            \
+    case '?'
 
 #define SYMBOL_CASE \
     case '{':       \
@@ -70,15 +93,15 @@ enum {
     case ')':       \
     case '\\'
 
-typedef char (*LEX_PROCESS_NEXT_CHAR)(struct lex_process* process);
-typedef char (*LEX_PROCESS_PEEK_CHAR)(struct lex_process* process);
-typedef void (*LEX_PROCESS_PUSH_CHAR)(struct lex_process* process, char c);
+typedef char (*LEX_PROCESS_NEXT_CHAR)(struct lex_process *process);
+typedef char (*LEX_PROCESS_PEEK_CHAR)(struct lex_process *process);
+typedef void (*LEX_PROCESS_PUSH_CHAR)(struct lex_process *process, char c);
 
 struct position
 {
     int line;
     int column;
-    const char* filename;
+    const char *filename;
 };
 
 struct token
@@ -90,34 +113,31 @@ struct token
     union
     {
         char cval;
-        const char* sval;
+        const char *sval;
         unsigned int inum;
         unsigned long lnum;
         unsigned long long llnum;
-        void* any;
+        void *any;
     };
 
-    //True if there is a white space between the current token and next token
+    // True if there is a white space between the current token and next token
     bool whitespace;
-    const char* between_brackets;
-    
+    const char *between_brackets;
 };
 
 struct compile_process
 {
-    //The flags to determine how this file should be compiled
+    // The flags to determine how this file should be compiled
     int flags;
     struct position pos;
 
     struct compile_process_input_file
     {
-        FILE* fp;
-        const char* abs_path;
+        FILE *fp;
+        const char *abs_path;
     } cfile;
 
-
-    FILE* ofile;
-        
+    FILE *ofile;
 };
 
 struct lex_process_functions
@@ -127,19 +147,18 @@ struct lex_process_functions
     LEX_PROCESS_PUSH_CHAR push_char;
 };
 
-
 struct lex_process
 {
     struct position pos;
-    struct vector* token_vec;
-    struct compile_process* compiler;
+    struct vector *token_vec;
+    struct compile_process *compiler;
 
     int current_expression_count;
-    struct buffer* parentheses_buffer;
-    struct lex_process_functions* function;
+    struct buffer *parentheses_buffer;
+    struct lex_process_functions *function;
 
-    //This is private data that lexer doesn't understand but the person using the lexer does
-    void* private;
+    // This is private data that lexer doesn't understand but the person using the lexer does
+    void *private;
 };
 
 #endif
