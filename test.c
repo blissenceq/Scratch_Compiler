@@ -10,7 +10,8 @@
 comment token
 @
 */
+0xAF58
 
 int case do
 '\t' '\n'
-'\\' 'a' //cases not working
+//'\\' 'a' //cases not working
