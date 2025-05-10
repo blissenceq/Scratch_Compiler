@@ -454,7 +454,7 @@ const char *read_hex_number_string()
     return buffer_ptr(buffer);
 }
 
-static struct token *token_make_special_number_hexadecimal()
+struct token *token_make_special_number_hexadecimal()
 {
     nextc();
     unsigned long number = 0;
@@ -463,16 +463,46 @@ static struct token *token_make_special_number_hexadecimal()
     return token_make_number_for_value(number);
 }
 
+void lexer_validate_binary_string(const char *str)
+{
+    size_t len = strlen(str);
+    for (int i = 0; i < len; i++)
+    {
+        if (str[i] != '0' && str[i] != '1')
+        {
+            compiler_error(lex_process->compiler, "Not a valid binary character\n");
+        }
+    }
+}
+
+struct token *token_make_special_number_binary()
+{
+    nextc();
+    unsigned long number = 0;
+    const char *num_str = read_number_str();
+    lexer_validate_binary_string(num_str);
+    number = strtol(num_str, 0, 2);
+    return token_make_number_for_value(number);
+}
+
 struct token *token_make_special_number()
 {
     struct token *token = NULL;
     struct token *last_token = lexer_last_token();
-    lexer_pop_token();
+    if (!last_token || last_token->type != TOKEN_TYPE_NUMBER || last_token->llnum != 0)
+    {
+        return token_make_keyword_or_identifier();
+    }
 
+    lexer_pop_token();
     char c = peekc();
     if (c == 'x')
     {
         token = token_make_special_number_hexadecimal();
+    }
+    else if (c == 'b')
+    {
+        token = token_make_special_number_binary();
     }
 
     return token;
@@ -540,8 +570,9 @@ struct token *read_next_token()
         token = token_make_quote();
         break;
 
+    case 'b':
     case 'x':
-        token = token_make_special_number_hexadecimal();
+        token = token_make_special_number();
         break;
 
     default:

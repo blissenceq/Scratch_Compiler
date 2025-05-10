@@ -10,7 +10,10 @@
 comment token
 @
 */
+0b11011001001
 0xAF58
+
+b0011011
 
 int case do
 '\t' '\n'
