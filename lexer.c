@@ -18,6 +18,11 @@ static struct token temp_token;
 
 struct token *read_next_token();
 
+bool lex_is_in_expression()
+{
+    return lex_process->current_expression_count > 0;
+}
+
 static char peekc()
 {
     return lex_process->function->peek_char(lex_process);
@@ -31,6 +36,11 @@ static void pushc(char c)
 static char nextc()
 {
     char c = lex_process->function->next_char(lex_process);
+    if (lex_is_in_expression())
+    {
+        buffer_write(lex_process->parentheses_buffer, c);
+    }
+
     lex_process->pos.column += 1;
     if (c == '\n')
     {
@@ -57,6 +67,10 @@ struct token *token_create(struct token *_token)
 {
     memcpy(&temp_token, _token, sizeof(struct token));
     temp_token.pos = lex_file_position();
+    if (lex_is_in_expression())
+    {
+        temp_token.between_brackets = buffer_ptr(lex_process->parentheses_buffer);
+    }
     return &temp_token;
 }
 
