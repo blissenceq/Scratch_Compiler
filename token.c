@@ -1,4 +1,4 @@
-#include "complier.h"
+#include "compiler.h"
 
 bool is_token_keyword(struct token *token, const char *value)
 {

@@ -1,6 +1,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
-#include "complier.h"
+#include "compiler.h"
 
 struct lex_process_functions compiler_lex_functions = {
     .next_char = compile_process_next_char,
@@ -23,6 +23,10 @@ int compile_file(const char *filename, const char *out_filename, int flags)
         return COMPILER_FAILED_WITH_ERRORS;
 
     // perform parsing
+    if (parse(compile_process) != PARSING_ALL_OKAY)
+    {
+        return COMPILER_FAILED_WITH_ERRORS;
+    }
 
     // perform code generation
 

@@ -16,6 +16,7 @@ struct compile_process *compile_process_create(const char *filename, const char 
 char compile_process_next_char(struct lex_process *lex_process);
 char compile_process_peek_char(struct lex_process *lex_process);
 void compile_process_push_char(struct lex_process *lex_process, char c);
+
 struct lex_process *lex_process_create(struct compile_process *compiler, struct lex_process_functions *functions, void *private);
 void lex_process_free(struct lex_process *process);
 void *lex_process_private(struct lex_process *process);
@@ -24,6 +25,8 @@ int lex(struct lex_process *process);
 void compiler_error(struct compile_process *compiler, const char *message, ...);
 void compiler_warning(struct compile_process *compiler, const char *message, ...);
 bool is_token_keyword(struct token *token, const char *value);
+
+int parse(struct compile_process *process);
 
 enum
 {
@@ -39,6 +42,12 @@ enum
 
 enum
 {
+    PARSING_ALL_OKAY,
+    PARSING_FAILED_WITH_ERROR
+};
+
+enum
+{
     TOKEN_TYPE_IDENTIFIER,
     TOKEN_TYPE_KEYWORD,
     TOKEN_TYPE_OPERATOR,
@@ -47,6 +56,40 @@ enum
     TOKEN_TYPE_STRING,
     TOKEN_TYPE_COMMENT,
     TOKEN_TYPE_NEWLINE
+};
+
+enum
+{
+    NODE_TYPE_EXPRESSION,
+    NODE_TYPE_EXPRESSION_PARENTHESES,
+    NODE_TYPE_NUMBER,
+    NODE_TYPE_IDENTIFIER,
+    NODE_TYPE_STRING,
+    NODE_TYPE_VARIABLE,
+    NODE_TYPE_VARIABLE_LIST,
+    NODE_TYPE_FUNCTION,
+    NODE_TYPE_BODY,
+    NODE_TYPE_STATEMENT_RETURN,
+    NODE_TYPE_STATEMENT_IF,
+    NODE_TYPE_STATEMENT_ELSE,
+    NODE_TYPE_STATEMENT_WHILE,
+    NODE_TYPE_STATEMENT_DO_WHILE,
+    NODE_TYPE_STATEMENT_FOR,
+    NODE_TYPE_STATEMENT_BREAK,
+    NODE_TYPE_STATEMENT_CONTINUE,
+    NODE_TYPE_STATEMENT_SWITCH,
+    NODE_TYPE_STATEMENT_CASE,
+    NODE_TYPE_STATEMENT_DEFAULT,
+    NODE_TYPE_STATEMENT_GOTO,
+
+    NODE_TYPE_UNARY,
+    NODE_TYPE_TENARY,
+    NODE_TYPE_LABEL,
+    NODE_TYPE_STRUCT,
+    NODE_TYPE_UNION,
+    NODE_TYPE_BRACKET,
+    NODE_TYPE_CAST,
+    NODE_TYPE_BLANK
 };
 
 #define S_EQ(string1, string2) \
@@ -125,6 +168,28 @@ struct token
     const char *between_brackets;
 };
 
+struct node
+{
+    int type;
+    int flag;
+    struct position pos;
+
+    struct node_binded
+    {
+        struct node *owner;    // Pointer to the body node
+        struct node *function; // Pointer to the parent function the node is part of
+    } binded;
+
+    union
+    {
+        char cval;
+        const char *sval;
+        unsigned int inum;
+        unsigned long lnum;
+        unsigned long long llnum;
+    };
+};
+
 struct compile_process
 {
     // The flags to determine how this file should be compiled
@@ -136,6 +201,10 @@ struct compile_process
         FILE *fp;
         const char *abs_path;
     } cfile;
+
+    struct vector *token_vec;
+    struct vector *node_vec;
+    struct vector *node_tree_vec;
 
     FILE *ofile;
 };
