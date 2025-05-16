@@ -1,4 +1,4 @@
-#include "complier.h"
+#include "compiler.h"
 #include "string.h"
 #include "helpers/vector.h"
 #include "helpers/buffer.h"

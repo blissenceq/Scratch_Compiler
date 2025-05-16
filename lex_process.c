@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include "helpers/vector.h"
-#include "complier.h"
+#include "compiler.h"
 
 struct lex_process *lex_process_create(struct compile_process *compiler, struct lex_process_functions *functions, void *private)
 {

@@ -16,6 +16,7 @@ struct compile_process *compile_process_create(const char *filename, const char 
 char compile_process_next_char(struct lex_process *lex_process);
 char compile_process_peek_char(struct lex_process *lex_process);
 void compile_process_push_char(struct lex_process *lex_process, char c);
+
 struct lex_process *lex_process_create(struct compile_process *compiler, struct lex_process_functions *functions, void *private);
 void lex_process_free(struct lex_process *process);
 void *lex_process_private(struct lex_process *process);
@@ -24,6 +25,8 @@ int lex(struct lex_process *process);
 void compiler_error(struct compile_process *compiler, const char *message, ...);
 void compiler_warning(struct compile_process *compiler, const char *message, ...);
 bool is_token_keyword(struct token *token, const char *value);
+
+int parse(struct compile_process *process);
 
 enum
 {
@@ -35,6 +38,12 @@ enum
 {
     LEXICAL_ANALYSIS_ALL_OK,
     LEXICAL_ANALYSIS_INPUT_ERROR
+};
+
+enum
+{
+    PARSING_ALL_OKAY,
+    PARSING_FAILED_WITH_ERROR
 };
 
 enum
@@ -192,6 +201,10 @@ struct compile_process
         FILE *fp;
         const char *abs_path;
     } cfile;
+
+    struct vector *token_vec;
+    struct vector *node_vec;
+    struct vector *node_tree_vec;
 
     FILE *ofile;
 };
