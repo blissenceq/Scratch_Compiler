@@ -12,6 +12,8 @@ struct lex_process;
 struct lex_process_functions;
 
 int compile_file(const char *filename, const char *out_filename, int file);
+void compiler_error(struct compile_process *compiler, const char *message, ...);
+void compiler_warning(struct compile_process *compiler, const char *message, ...);
 struct compile_process *compile_process_create(const char *filename, const char *filename_out, int flags);
 char compile_process_next_char(struct lex_process *lex_process);
 char compile_process_peek_char(struct lex_process *lex_process);
@@ -22,9 +24,19 @@ void lex_process_free(struct lex_process *process);
 void *lex_process_private(struct lex_process *process);
 struct vector *lex_process_tokens(struct lex_process *process);
 int lex(struct lex_process *process);
-void compiler_error(struct compile_process *compiler, const char *message, ...);
-void compiler_warning(struct compile_process *compiler, const char *message, ...);
+
 bool is_token_keyword(struct token *token, const char *value);
+bool token_is_comment_newline_or_newline_seperator(struct token *token);
+bool token_is_symbol(struct token *token, char c);
+static struct token *token_next();
+static void parser_ignore_comment_or_newline(struct token *token);
+
+void node_set_vector(struct vector *vector, struct vector *vector_root);
+void node_push(struct node *node);
+struct node *node_peek_or_null();
+struct node *node_peek();
+struct node *node_pop();
+struct node *node_create(struct node *_node);
 
 int parse(struct compile_process *process);
 
