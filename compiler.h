@@ -10,6 +10,7 @@ struct position;
 struct compile_process;
 struct lex_process;
 struct lex_process_functions;
+struct node;
 
 int compile_file(const char *filename, const char *out_filename, int file);
 void compiler_error(struct compile_process *compiler, const char *message, ...);
@@ -29,6 +30,10 @@ bool is_token_keyword(struct token *token, const char *value);
 bool token_is_comment_newline_or_newline_seperator(struct token *token);
 bool token_is_symbol(struct token *token, char c);
 static struct token *token_next();
+static struct token *token_peek_next();
+
+int parse(struct compile_process *process);
+void parse_single_token_to_node();
 static void parser_ignore_comment_or_newline(struct token *token);
 
 void node_set_vector(struct vector *vector, struct vector *vector_root);
@@ -37,8 +42,6 @@ struct node *node_peek_or_null();
 struct node *node_peek();
 struct node *node_pop();
 struct node *node_create(struct node *_node);
-
-int parse(struct compile_process *process);
 
 enum
 {
