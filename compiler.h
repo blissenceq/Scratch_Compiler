@@ -42,6 +42,9 @@ struct node *node_peek_or_null();
 struct node *node_peek();
 struct node *node_pop();
 struct node *node_create(struct node *_node);
+bool node_is_expressionable(struct node *node);
+struct node *node_peek_expressionable_or_null();
+void node_make_expression(struct node *left, struct node *right, const char *operator);
 
 enum
 {
@@ -105,6 +108,11 @@ enum
     NODE_TYPE_BRACKET,
     NODE_TYPE_CAST,
     NODE_TYPE_BLANK
+};
+
+enum
+{
+    NODE_FLAG_INSIDE_EXPRESSION = 0b00000001
 };
 
 #define S_EQ(string1, string2) \
@@ -202,6 +210,16 @@ struct node
         unsigned int inum;
         unsigned long lnum;
         unsigned long long llnum;
+    };
+
+    union
+    {
+        struct expression
+        {
+            struct node *left;
+            struct node *right;
+            const char *operator;
+        } expression;
     };
 };
 

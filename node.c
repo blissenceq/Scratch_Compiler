@@ -29,7 +29,7 @@ struct node *node_peek()
 struct node *node_pop()
 {
     struct node *last_node = vector_back_ptr(node_vector);
-    struct node *last_node_root = vector_empty(node_vector) ? NULL : vector_back_ptr(node_vector_root);
+    struct node *last_node_root = vector_empty(node_vector) ? NULL : vector_back_ptr_or_null(node_vector_root);
 
     vector_pop(node_vector);
     if (last_node == last_node_root)
@@ -47,4 +47,27 @@ struct node *node_create(struct node *_node)
 #warning "Set binded owner and binded function here"
     node_push(node);
     return node;
+}
+
+bool node_is_expressionable(struct node *node)
+{
+    return node->type == NODE_TYPE_EXPRESSION ||
+           node->type == NODE_TYPE_EXPRESSION_PARENTHESES ||
+           node->type == NODE_TYPE_UNARY ||
+           node->type == NODE_TYPE_IDENTIFIER ||
+           node->type == NODE_TYPE_NUMBER ||
+           node->type == NODE_TYPE_STRING;
+}
+
+struct node *node_peek_expressionable_or_null()
+{
+    struct node *node = node_peek_or_null();
+    return node_is_expressionable(node) ? node : NULL;
+}
+
+void node_make_expression(struct node *left, struct node *right, const char *operator)
+{
+    assert(left);
+    assert(right);
+    node_create(&(struct node){.type = NODE_TYPE_EXPRESSION, .expression.left = left, .expression.right = right, .expression.operator = operator});
 }
