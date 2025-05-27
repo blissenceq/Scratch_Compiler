@@ -115,6 +115,12 @@ enum
     NODE_FLAG_INSIDE_EXPRESSION = 0b00000001
 };
 
+enum
+{
+    ASSOCIATIVITY_LEFT_TO_RIGHT,
+    ASSOCIATIVITY_RIGHT_TO_LEFT
+};
+
 #define S_EQ(string1, string2) \
     string1 &&string2 && (strcmp(string1, string2) == 0)
 
@@ -158,6 +164,9 @@ enum
     case ']':       \
     case ')':       \
     case '\\'
+
+#define TOTAL_OPERATOR_GROUPS 14
+#define MAX_OPERATORS_IN_GROUP 12
 
 typedef char (*LEX_PROCESS_NEXT_CHAR)(struct lex_process *process);
 typedef char (*LEX_PROCESS_PEEK_CHAR)(struct lex_process *process);
@@ -261,6 +270,12 @@ struct lex_process
 
     // This is private data that lexer doesn't understand but the person using the lexer does
     void *private;
+};
+
+struct expressionable_operator_precedence_group
+{
+    char *operators[MAX_OPERATORS_IN_GROUP];
+    int associtivity;
 };
 
 #endif
