@@ -1,8 +1,10 @@
+#include <assert.h>
 #include "compiler.h"
 #include "helpers/vector.h"
 
 static struct compile_process *current_process;
 static struct token *parser_last_token;
+extern struct expressionable_operator_precedence_group operator_group[TOTAL_OPERATOR_GROUPS];
 
 struct history
 {
@@ -81,6 +83,77 @@ void parse_expressionable_for_operator(struct history *history, const char *oper
     parse_expressionable_token(history);
 }
 
+static int parser_get_precedence_for_operator(const char *op, struct expressionable_operator_precedence_group **group_ptr)
+{
+    *group_ptr = NULL;
+    for (int i = 0; i < TOTAL_OPERATOR_GROUPS; i++)
+    {
+        for (int j = 0; operator_group[i].operators[j]; j++)
+        {
+            const char *_op = operator_group[i].operators[j];
+            if (S_EQ(op, _op))
+            {
+                *group_ptr = &operator_group[i];
+                return i;
+            }
+        }
+    }
+
+    return -1;
+}
+
+static bool parser_left_operator_has_higher_priority(const char *op_left, const char *op_right)
+{
+    struct expressionable_operator_precedence_group *group_left = NULL;
+    struct expressionable_operator_precedence_group *group_right = NULL;
+    int precedence_left = parser_get_precedence_for_operator(op_left, &group_left);
+    int precedence_right = parser_get_precedence_for_operator(op_right, &group_right);
+
+    if (group_left->associtivity == ASSOCIATIVITY_RIGHT_TO_LEFT)
+        return false;
+
+    return precedence_left <= precedence_right;
+}
+
+void parser_node_shift_children_left(struct node *node)
+{
+    assert(node->type == NODE_TYPE_EXPRESSION);
+    assert(node->expression.right == NODE_TYPE_EXPRESSION);
+
+    struct node *new_exp_node_left = node->expression.left;
+    struct node *new_exp_node_right = node->expression.right->expression.left;
+    const char *new_exp_op = node->expression.operator;
+    const char *node_exp_op = node->expression.right->expression.operator;
+    struct node *node_exp_right = node->expression.right->expression.right;
+
+    node_make_expression(new_exp_node_left, new_exp_node_right, new_exp_op);
+    struct node *node_exp_left = node_pop();
+
+    node->expression.left = node_exp_left;
+    node->expression.right = node_exp_right;
+    node->expression.operator = node_exp_op;
+}
+
+void parser_reorder_expression(struct node **node_ptr)
+{
+    struct node *node = *node_ptr;
+    if (node->type != NODE_TYPE_EXPRESSION)
+        return;
+    if (node->expression.left->type != NODE_TYPE_EXPRESSION && node->expression.right->type != NODE_TYPE_EXPRESSION)
+        return;
+
+    if (node->expression.left->type != NODE_TYPE_EXPRESSION && node->expression.right && node->expression.right->type == NODE_TYPE_EXPRESSION)
+    {
+        const char *op_right = node->expression.right->expression.operator;
+        if (parser_left_operator_has_higher_priority(node->expression.operator, op_right))
+        {
+            parser_node_shift_children_left(node);
+            parser_reorder_expression(&node->expression.left);
+            parser_reorder_expression(&node->expression.right);
+        }
+    }
+}
+
 void parse_expression_normal(struct history *history)
 {
     struct token *token = token_peek_next();
@@ -102,9 +175,7 @@ void parse_expression_normal(struct history *history)
 
     node_make_expression(node_left, node_right, operator);
     struct node *node_expression = node_pop();
-
-    //TODO: Reorder the expression
-
+    parser_reorder_expression(&node_expression);
     node_push(node_expression);
 }
 
