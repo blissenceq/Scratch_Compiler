@@ -191,6 +191,80 @@ void parse_identifier(struct history *history)
     parse_single_token_to_node();
 }
 
+static bool keyword_is_variable_modifier(const char *str)
+{
+    return S_EQ(str, "unsigned") ||
+           S_EQ(str, "signed") ||
+           S_EQ(str, "static") ||
+           S_EQ(str, "const") ||
+           S_EQ(str, "extern") ||
+           S_EQ(str, "__ignore_typecheck__");
+}
+
+void parse_data_type_modifiers(struct data_type *data_type)
+{
+    struct token *token = token_peek_next();
+    while (token && token->type == TOKEN_TYPE_KEYWORD)
+    {
+        if (!keyword_is_variable_modifier(token->sval))
+            break;
+
+        if (S_EQ(token->sval, "unsigned"))
+        {
+            data_type->flags &= ~DATATYPE_FLAG_IS_SIGNED;
+        }
+        else if (S_EQ(token->sval, "signed"))
+        {
+            data_type->flags |= DATATYPE_FLAG_IS_SIGNED;
+        }
+        else if (S_EQ(token->sval, "static"))
+        {
+            data_type->flags |= DATATYPE_FLAG_IS_STATIC;
+        }
+        else if (S_EQ(token->sval, "const"))
+        {
+            data_type->flags |= DATATYPE_FLAG_IS_CONST;
+        }
+        else if (S_EQ(token->sval, "extern"))
+        {
+            data_type->flags |= DATATYPE_FLAG_IS_EXTERN;
+        }
+        else if (S_EQ(token->sval, "__ignore_typecheck__"))
+        {
+            data_type->flags |= DATATYPE_FLAG_IGNORE_TYPE_CHECKING;
+        }
+
+        token_next();
+        token = token_peek_next();
+    }
+}
+
+void parse_data_type(struct data_type *data_type)
+{
+    memset(data_type, 0, sizeof(struct data_type));
+    data_type->flags |= DATATYPE_FLAG_IS_SIGNED; // In C, all variables are signed by default
+
+    parse_data_type_modifiers(data_type);
+    parse_data_type_type(data_type);
+    parse_data_type_modifiers(data_type);
+}
+
+void parse_variable_function_union_or_struct(struct history *history)
+{
+    struct data_type *data_type;
+    parse_data_type(&data_type);
+}
+
+void parse_keyword(struct history *history)
+{
+    struct token *token = token_peek_next();
+    if (keyword_is_variable_modifier(token->sval) || keyword_is_datatype(token->sval))
+    {
+        parse_variable_function_union_or_struct(history);
+        return;
+    }
+}
+
 int parse_expressionable_single_token(struct history *history)
 {
     struct token *token = token_peek_next();
@@ -216,6 +290,11 @@ int parse_expressionable_single_token(struct history *history)
 
     case TOKEN_TYPE_IDENTIFIER:
         parse_identifier(history);
+        break;
+
+    case TOKEN_TYPE_KEYWORD:
+        parse_keyword(history);
+        result = 0;
         break;
     }
 
